@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}My Fine Records - Student Portal{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">💸 My Fines &amp; Penalties</h1>
+    <p class="page-subtitle">Track overdue loan charges and settlement receipts</p>
+  </div>
+</div>
+
+<!-- Student Fine Status Cards -->
+<div class="stats-grid">
+  <div class="stat-card {{ 'alert-card' if student.unpaid_fine > 0 else 'success-card' }}">
+    <span class="stat-label">Outstanding Unpaid Fines</span>
+    <span class="stat-value">₹{{ "%.2f"|format(student.unpaid_fine) }}</span>
+    <span class="stat-desc">
+      {% if student.unpaid_fine > 0 %}
+        ⚠️ Please visit the library circulation desk to clear pending dues.
+      {% else %}
+        ✓ All fines cleared. No dues outstanding!
+      {% endif %}
+    </span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Itemized Fine Ledger</div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Fine ID</th>
+          <th>Book Title</th>
+          <th>Issue Date</th>
+          <th>Due Date</th>
+          <th>Return Date</th>
+          <th>Penalty Incurred</th>
+          <th>Payment Status</th>
+          <th>Settlement Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in fines %}
+          <tr>
+            <td>#{{ f.fine_id }}</td>
+            <td><strong>{{ f.title }}</strong></td>
+            <td>{{ f.issue_date }}</td>
+            <td>{{ f.due_date }}</td>
+            <td>{{ f.return_date }}</td>
+            <td><strong>₹{{ "%.2f"|format(f.fine_amount) }}</strong></td>
+            <td>
+              {% if f.payment_status == 'PAID' %}
+                <span class="badge badge-paid">PAID</span>
+              {% else %}
+                <span class="badge badge-unpaid">UNPAID</span>
+              {% endif %}
+            </td>
+            <td>{{ f.paid_date or 'Pending Payment' }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="8" style="text-align:center; color:var(--text-muted); padding:3rem;">
+              No fine records on your account. Keep returning books on time!
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

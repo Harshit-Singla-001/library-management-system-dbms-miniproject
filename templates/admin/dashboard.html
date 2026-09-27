@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Admin Dashboard</h1>
+    <p class="page-subtitle">Real-time circulation metrics and database-driven statistics</p>
+  </div>
+  <div style="display: flex; gap: 0.5rem;">
+    <a href="{{ url_for('admin.permissions') }}" class="btn btn-warning">🛡️ Manage Permissions</a>
+    <a href="{{ url_for('admin.add_book') }}" class="btn btn-primary">+ Add New Book</a>
+  </div>
+</div>
+
+<!-- Primary KPI Metric Cards Grid -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <span class="stat-label">Total Registered Students</span>
+    <span class="stat-value">{{ stats.total_students }}</span>
+    <span class="stat-desc">{{ stats.granted_students }} Granted &bull; {{ stats.revoked_students }} Revoked</span>
+  </div>
+
+  <div class="stat-card">
+    <span class="stat-label">Total Unique Book Titles</span>
+    <span class="stat-value">{{ stats.total_titles }}</span>
+    <span class="stat-desc">{{ stats.total_inventory }} Total Physical Copies</span>
+  </div>
+
+  <div class="stat-card success-card">
+    <span class="stat-label">Available on Shelves</span>
+    <span class="stat-value">{{ stats.available_inventory }}</span>
+    <span class="stat-desc">Ready for immediate checkout</span>
+  </div>
+
+  <div class="stat-card">
+    <span class="stat-label">Currently Issued Loans</span>
+    <span class="stat-value">{{ stats.active_loans }}</span>
+    <span class="stat-desc">Books currently with students</span>
+  </div>
+
+  <div class="stat-card alert-card">
+    <span class="stat-label">Overdue Loans</span>
+    <span class="stat-value">{{ stats.overdue_loans }}</span>
+    <span class="stat-desc">Past 14-day loan return deadline</span>
+  </div>
+
+  <div class="stat-card warning-card">
+    <span class="stat-label">Students at 3-Book Limit</span>
+    <span class="stat-value">{{ max_borrowers }}</span>
+    <span class="stat-desc">Cannot borrow further books</span>
+  </div>
+
+  <div class="stat-card alert-card">
+    <span class="stat-label">Revoked Permissions</span>
+    <span class="stat-value">{{ stats.revoked_students }}</span>
+    <span class="stat-desc">Borrowing access suspended</span>
+  </div>
+
+  <div class="stat-card alert-card">
+    <span class="stat-label">Total Unpaid Fines</span>
+    <span class="stat-value">₹{{ "%.2f"|format(stats.total_unpaid_fines) }}</span>
+    <span class="stat-desc">{{ stats.students_with_fines }} students with pending dues</span>
+  </div>
+</div>
+
+<!-- Recent Circulation Activity Table -->
+<div class="card">
+  <div class="card-title">
+    <span>📋 Recent Circulation Activity</span>
+    <a href="{{ url_for('admin.reports') }}" class="btn btn-sm btn-outline">View Comprehensive Reports &rarr;</a>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Issue ID</th>
+          <th>Roll Number</th>
+          <th>Student Name</th>
+          <th>Book Title</th>
+          <th>Issue Date</th>
+          <th>Due Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for issue in recent_issues %}
+          <tr>
+            <td>#{{ issue.issue_id }}</td>
+            <td><strong>{{ issue.roll_number }}</strong></td>
+            <td>{{ issue.full_name }}</td>
+            <td>{{ issue.title }}</td>
+            <td>{{ issue.issue_date }}</td>
+            <td>{{ issue.due_date }}</td>
+            <td>
+              {% if issue.status == 'RETURNED' %}
+                <span class="badge badge-returned">RETURNED</span>
+              {% elif issue.status == 'OVERDUE' %}
+                <span class="badge badge-overdue">OVERDUE</span>
+              {% else %}
+                <span class="badge badge-issued">ACTIVE</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted);">No issue records found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

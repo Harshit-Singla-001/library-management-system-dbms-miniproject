@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard - Library Portal{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Welcome, {{ student.full_name }}!</h1>
+    <p class="page-subtitle">Roll Number: <strong>{{ student.roll_number }}</strong> &bull; Department: {{ student.department }}</p>
+  </div>
+  <a href="{{ url_for('student.books') }}" class="btn btn-primary">📖 Browse Book Catalog</a>
+</div>
+
+<!-- Student Status Indicator Cards -->
+<div class="stats-grid">
+  <!-- Borrowing Permission Card (Reflects live eligibility & restrictions) -->
+  <div class="stat-card {{ 'success-card' if student.effective_permission == 'GRANTED' else 'alert-card' }}" 
+       title="{{ student.permission_reason }}" style="cursor: help;">
+    <span class="stat-label">Borrowing Permission Status</span>
+    <span class="stat-value" style="font-size: 1.5rem;">
+      {% if student.effective_permission == 'GRANTED' %}
+        <span class="badge badge-granted" title="{{ student.permission_reason }}">✓ GRANTED</span>
+      {% else %}
+        <span class="badge badge-revoked" title="{{ student.permission_reason }}">✗ REVOKED</span>
+      {% endif %}
+    </span>
+    <span class="stat-desc" style="font-weight: 500;">
+      {{ student.permission_reason }}
+    </span>
+  </div>
+
+  <!-- Active Loans Counter Card -->
+  <div class="stat-card {{ 'alert-card' if student.active_books >= max_books else 'warning-card' }}">
+    <span class="stat-label">Currently Issued Books</span>
+    <span class="stat-value">{{ student.active_books }} / {{ max_books }}</span>
+    <span class="stat-desc">
+      {% if student.active_books >= max_books %}
+        Borrowing limit reached (3 max).
+      {% else %}
+        Can borrow {{ max_books - student.active_books }} more book(s).
+      {% endif %}
+    </span>
+  </div>
+
+  <!-- Outstanding Fines Card -->
+  <div class="stat-card {{ 'alert-card' if student.unpaid_fine > 0 else 'success-card' }}">
+    <span class="stat-label">Outstanding Unpaid Fines</span>
+    <span class="stat-value">₹{{ "%.2f"|format(student.unpaid_fine) }}</span>
+    <span class="stat-desc">
+      {% if student.unpaid_fine > 0 %}
+        Must be cleared to issue new books.
+      {% else %}
+        Account in good standing (₹0 dues).
+      {% endif %}
+    </span>
+  </div>
+</div>
+
+<!-- Currently Issued Books Table -->
+<div class="card">
+  <div class="card-title">
+    <span>🎒 My Currently Issued Books ({{ active_loans|length }})</span>
+    <a href="{{ url_for('student.return_page') }}" class="btn btn-sm btn-outline">Check In / Return &rarr;</a>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Issue ID</th>
+          <th>Book Title</th>
+          <th>ISBN</th>
+          <th>Issue Date</th>
+          <th>Due Date</th>
+          <th>Time Remaining</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for loan in active_loans %}
+          <tr>
+            <td>#{{ loan.issue_id }}</td>
+            <td><strong>{{ loan.title }}</strong></td>
+            <td><code>{{ loan.isbn }}</code></td>
+            <td>{{ loan.issue_date }}</td>
+            <td><strong>{{ loan.due_date }}</strong></td>
+            <td>
+              {% if loan.days_left < 0 %}
+                <span class="badge badge-overdue">⚠️ {{ loan.days_overdue }} day(s) Overdue</span>
+              {% elif loan.days_left == 0 %}
+                <span class="badge badge-warning">Due Today!</span>
+              {% else %}
+                <span class="badge badge-info">{{ loan.days_left }} day(s) left</span>
+              {% endif %}
+            </td>
+            <td>
+              <form method="POST" action="{{ url_for('student.process_return', issue_id=loan.issue_id) }}" 
+                    onsubmit="return confirmAction('Return {{ loan.title }} to library?');">
+                <button type="submit" class="btn btn-sm btn-outline">
+                  ↩️ Return Now
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+              You currently have no active book loans. Ready to read something new?
+              <br><br>
+              <a href="{{ url_for('student.books') }}" class="btn btn-sm btn-primary">Browse Available Books</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

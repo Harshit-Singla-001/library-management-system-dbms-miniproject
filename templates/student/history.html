@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Borrowing History - Student Portal{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">📜 My Borrowing History</h1>
+    <p class="page-subtitle">Complete chronological record of all previously returned books</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Issue ID</th>
+          <th>Book Title</th>
+          <th>ISBN</th>
+          <th>Issue Date</th>
+          <th>Due Date</th>
+          <th>Return Date</th>
+          <th>Loan Status</th>
+          <th>Fine Record</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for loan in past_loans %}
+          <tr>
+            <td>#{{ loan.issue_id }}</td>
+            <td><strong>{{ loan.title }}</strong></td>
+            <td><code>{{ loan.isbn }}</code></td>
+            <td>{{ loan.issue_date }}</td>
+            <td>{{ loan.due_date }}</td>
+            <td><strong>{{ loan.return_date }}</strong></td>
+            <td><span class="badge badge-returned">RETURNED</span></td>
+            <td>
+              {% if loan.fine_amount %}
+                {% if loan.payment_status == 'PAID' %}
+                  <span class="badge badge-paid">₹{{ "%.2f"|format(loan.fine_amount) }} (Paid)</span>
+                {% else %}
+                  <span class="badge badge-unpaid">₹{{ "%.2f"|format(loan.fine_amount) }} (Unpaid)</span>
+                {% endif %}
+              {% else %}
+                <span style="color:var(--text-muted); font-size:0.85rem;">₹0.00 (On Time)</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="8" style="text-align:center; color:var(--text-muted); padding:3rem;">
+              No completed borrowing transactions yet.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

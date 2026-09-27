@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Edit Book' if book else 'Add New Book' }} - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{{ '✏️ Edit Book Record' if book else '➕ Add New Book Title' }}</h1>
+    <p class="page-subtitle">Configure catalog metadata, authors (M:N relationship), and inventory counts</p>
+  </div>
+  <a href="{{ url_for('admin.books') }}" class="btn btn-outline">&larr; Back to Books</a>
+</div>
+
+<div class="card" style="max-width: 780px; margin: 0 auto;">
+  <form method="POST">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="isbn">ISBN (10 or 13 digits) *</label>
+        <input type="text" id="isbn" name="isbn" class="form-control" 
+               placeholder="e.g. 9780078022159" value="{{ book.isbn if book else '' }}" 
+               {% if book %}readonly style="background:#f1f5f9;"{% else %}required{% endif %}>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="category_id">Category / Taxonomy *</label>
+        <select id="category_id" name="category_id" class="form-control" required>
+          <option value="">Select Category</option>
+          {% for c in categories %}
+            <option value="{{ c.category_id }}" {% if book and book.category_id == c.category_id %}selected{% endif %}>
+              {{ c.category_name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="title">Book Title *</label>
+      <input type="text" id="title" name="title" class="form-control" 
+             placeholder="Full Book Title" value="{{ book.title if book else '' }}" required>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="edition">Edition</label>
+        <input type="text" id="edition" name="edition" class="form-control" 
+               placeholder="e.g. 8th Edition" value="{{ book.edition if book else '' }}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="publish_year">Publication Year</label>
+        <input type="number" id="publish_year" name="publish_year" class="form-control" 
+               placeholder="e.g. 2022" min="1900" max="2099" value="{{ book.publish_year if book else '' }}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="total_copies">Total Physical Copies *</label>
+        <input type="number" id="total_copies" name="total_copies" class="form-control" 
+               min="1" max="50" value="{{ book.total_copies if book else '3' }}" required>
+        {% if book %}
+          <small style="color:var(--text-muted);">Current shelf available: {{ book.available_copies }} copy/copies.</small>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- M:N Junction: Multiple Authors Selection -->
+    <div class="form-group">
+      <label class="form-label">Authors (Select one or more contributors - M:N Relation):</label>
+      <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.5rem; background: #f8fafc; padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border); max-height: 180px; overflow-y: auto;">
+        {% for a in authors %}
+          <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.875rem; cursor:pointer;">
+            <input type="checkbox" name="author_ids" value="{{ a.author_id }}"
+                   {% if a.author_id in book_author_ids %}checked{% endif %}>
+            {{ a.author_name }}
+          </label>
+        {% endfor %}
+      </div>
+      <small style="color:var(--text-muted); margin-top:0.4rem; display:block;">
+        Need a new author? Add them in the <a href="{{ url_for('admin.authors') }}" target="_blank">Authors master</a> first.
+      </small>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem;">
+      <a href="{{ url_for('admin.books') }}" class="btn btn-outline">Cancel</a>
+      <button type="submit" class="btn btn-primary">
+        {{ 'Update Book in Database' if book else 'Save Book to Catalog' }}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

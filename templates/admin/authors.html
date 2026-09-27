@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Authors - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">✍️ Author Master Catalog</h1>
+    <p class="page-subtitle">Add and manage authors connected via the <code>book_authors</code> junction table (1NF/M:N)</p>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; align-items: start;">
+  <!-- Add Author Form -->
+  <div class="card">
+    <div class="card-title">➕ Add New Author</div>
+    <form method="POST" action="{{ url_for('admin.add_author') }}">
+      <div class="form-group">
+        <label class="form-label" for="author_name">Author Full Name *</label>
+        <input type="text" id="author_name" name="author_name" class="form-control" placeholder="e.g. Donald E. Knuth" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="biography">Short Biography</label>
+        <textarea id="biography" name="biography" class="form-control" rows="3" placeholder="Credentials, university, or research focus..."></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%;">Save Author</button>
+    </form>
+  </div>
+
+  <!-- Authors List -->
+  <div class="card">
+    <div class="card-title">Authors Directory ({{ authors|length }} Authors)</div>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Author Name</th>
+            <th>Biography</th>
+            <th>Linked Titles</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in authors %}
+            <tr>
+              <td><strong>{{ a.author_name }}</strong></td>
+              <td><small style="color:var(--text-muted);">{{ a.biography or 'No bio provided.' }}</small></td>
+              <td><span class="badge badge-info">{{ a.book_count }} book(s)</span></td>
+              <td>
+                <form method="POST" action="{{ url_for('admin.delete_author', author_id=a.author_id) }}" onsubmit="return confirmAction('Delete author: {{ a.author_name }}?');">
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

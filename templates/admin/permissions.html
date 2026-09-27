@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Borrowing Permissions - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">🛡️ Student Borrowing Permissions</h1>
+    <p class="page-subtitle">
+      Control student book checkout privileges. Changes execute an immediate <code>UPDATE students SET borrowing_permission = ...</code> in MySQL.
+    </p>
+  </div>
+</div>
+
+<!-- Filters -->
+<form method="GET" action="{{ url_for('admin.permissions') }}" class="filter-bar">
+  <input type="text" name="search" class="form-control" placeholder="Search by Roll No. or Name..." value="{{ search or '' }}">
+  
+  <select name="permission" class="form-control" style="max-width: 200px;" onchange="this.form.submit()">
+    <option value="">All Permissions</option>
+    <option value="GRANTED" {% if perm_filter == 'GRANTED' %}selected{% endif %}>GRANTED Only</option>
+    <option value="REVOKED" {% if perm_filter == 'REVOKED' %}selected{% endif %}>REVOKED Only</option>
+  </select>
+
+  <button type="submit" class="btn btn-primary">Filter</button>
+  {% if search or perm_filter %}
+    <a href="{{ url_for('admin.permissions') }}" class="btn btn-outline">Clear</a>
+  {% endif %}
+</form>
+
+<!-- Permissions Data Table -->
+<div class="card">
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Roll Number</th>
+          <th>Student Name</th>
+          <th>Department</th>
+          <th>Active Loans</th>
+          <th>Unpaid Fines</th>
+          <th>Current Status</th>
+          <th>Direct Database Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+          <tr>
+            <td><strong>{{ s.roll_number }}</strong></td>
+            <td>{{ s.full_name }}</td>
+            <td>{{ s.department }}</td>
+            <td>
+              {% if s.active_books >= 3 %}
+                <span class="badge badge-danger">{{ s.active_books }} / 3 (Max Limit)</span>
+              {% elif s.active_books > 0 %}
+                <span class="badge badge-warning">{{ s.active_books }} / 3</span>
+              {% else %}
+                <span class="badge badge-info">0 / 3</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if s.unpaid_fine > 0 %}
+                <span class="badge badge-danger">₹{{ "%.2f"|format(s.unpaid_fine) }}</span>
+              {% else %}
+                <span class="badge badge-success">₹0.00</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if s.borrowing_permission == 'GRANTED' %}
+                <span class="badge badge-granted">✓ GRANTED</span>
+              {% else %}
+                <span class="badge badge-revoked">✗ REVOKED</span>
+              {% endif %}
+            </td>
+            <td>
+              <form method="POST" action="{{ url_for('admin.update_permission', student_id=s.student_id) }}" style="display:inline;">
+                {% if s.borrowing_permission == 'GRANTED' %}
+                  <input type="hidden" name="action" value="REVOKE">
+                  <button type="submit" class="btn btn-sm btn-danger" 
+                          onclick="return confirmAction('Are you sure you want to REVOKE borrowing permissions for {{ s.full_name }}?');">
+                    🚫 Revoke Permission
+                  </button>
+                {% else %}
+                  <input type="hidden" name="action" value="GRANT">
+                  <button type="submit" class="btn btn-sm btn-success" 
+                          onclick="return confirmAction('Grant borrowing permissions for {{ s.full_name }}?');">
+                    ✅ Grant Permission
+                  </button>
+                {% endif %}
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted);">No student records matched the criteria.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

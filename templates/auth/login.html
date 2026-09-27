@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In - Library Management System{% endblock %}
+
+{% block content %}
+<div class="login-wrapper">
+  <div class="login-header">
+    <div class="login-logo">🏛️</div>
+    <h2>Library Portal Login</h2>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">Sign in with your administrator or student credentials</p>
+  </div>
+
+  <form method="POST" action="{{ url_for('auth.login') }}">
+    <div class="form-group">
+      <label class="form-label" for="username">Username / Student Roll No.</label>
+      <input type="text" id="username" name="username" class="form-control" 
+             placeholder="e.g. admin or 2417119" value="{{ username or '' }}" required autofocus>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="password">Password</label>
+      <input type="password" id="password" name="password" class="form-control" 
+             placeholder="••••••••" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">
+      🔐 Authenticate &amp; Enter Portal
+    </button>
+  </form>
+
+  <!-- Quick Demo Credentials Box for Viva Examiners & Presentation -->
+  <div class="demo-box">
+    <div class="demo-title">⚡ Quick Fill Demo Accounts (For Viva Presentation)</div>
+    <div class="demo-pills">
+      <button type="button" class="demo-pill" onclick="fillLogin('admin', 'admin123')">
+        👨‍💼 Admin (Librarian)
+      </button>
+      <button type="button" class="demo-pill" onclick="fillLogin('2417119', 'std119')">
+        🎓 Student (Clean: 2417119)
+      </button>
+      <button type="button" class="demo-pill" onclick="fillLogin('2417112', 'std112')">
+        🚫 3-Books Max (2417112)
+      </button>
+      <button type="button" class="demo-pill" onclick="fillLogin('2417125', 'std125')">
+        🛡️ Revoked
+      </button>
+      <button type="button" class="demo-pill" onclick="fillLogin('2417130', 'std130')">
+        💸 Unpaid Fine (2417130)
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}

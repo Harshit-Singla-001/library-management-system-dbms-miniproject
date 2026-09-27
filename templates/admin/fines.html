@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Fines & Penalties - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">💰 Fines &amp; Penalty Management</h1>
+    <p class="page-subtitle">Track late return fees, audit penalties, and record student settlements</p>
+  </div>
+</div>
+
+<!-- Financial Summary KPI Cards -->
+<div class="stats-grid">
+  <div class="stat-card alert-card">
+    <span class="stat-label">Total Outstanding Unpaid Fines</span>
+    <span class="stat-value">₹{{ "%.2f"|format(total_unpaid) }}</span>
+    <span class="stat-desc">Pending collection from students</span>
+  </div>
+
+  <div class="stat-card success-card">
+    <span class="stat-label">Total Collected Fines</span>
+    <span class="stat-value">₹{{ "%.2f"|format(total_collected) }}</span>
+    <span class="stat-desc">Successfully settled penalties</span>
+  </div>
+</div>
+
+<!-- Status Filter Tabs -->
+<div style="display:flex; gap:0.5rem; margin-bottom: 1.25rem;">
+  <a href="{{ url_for('admin.fines', status='UNPAID') }}" class="btn {{ 'btn-primary' if status_filter == 'UNPAID' else 'btn-outline' }}">
+    🔴 Unpaid Fines
+  </a>
+  <a href="{{ url_for('admin.fines', status='PAID') }}" class="btn {{ 'btn-primary' if status_filter == 'PAID' else 'btn-outline' }}">
+    🟢 Paid Fines
+  </a>
+  <a href="{{ url_for('admin.fines', status='ALL') }}" class="btn {{ 'btn-primary' if status_filter == 'ALL' else 'btn-outline' }}">
+    All Fines History
+  </a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Fine ID</th>
+          <th>Roll Number</th>
+          <th>Student Name</th>
+          <th>Department</th>
+          <th>Book Title</th>
+          <th>Due Date</th>
+          <th>Return Date</th>
+          <th>Penalty Amount</th>
+          <th>Payment Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in fines %}
+          <tr>
+            <td>#{{ f.fine_id }}</td>
+            <td><strong>{{ f.roll_number }}</strong></td>
+            <td>{{ f.full_name }}</td>
+            <td>{{ f.department }}</td>
+            <td>{{ f.book_title }}</td>
+            <td>{{ f.due_date }}</td>
+            <td>{{ f.return_date }}</td>
+            <td><strong>₹{{ "%.2f"|format(f.fine_amount) }}</strong></td>
+            <td>
+              {% if f.payment_status == 'PAID' %}
+                <span class="badge badge-paid">PAID on {{ f.paid_date }}</span>
+              {% else %}
+                <span class="badge badge-unpaid">UNPAID</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if f.payment_status == 'UNPAID' %}
+                <form method="POST" action="{{ url_for('admin.pay_fine', fine_id=f.fine_id) }}" onsubmit="return confirmAction('Collect ₹{{ f.fine_amount }} fine from {{ f.full_name }}?');">
+                  <button type="submit" class="btn btn-sm btn-success">
+                    💵 Collect / Mark Paid
+                  </button>
+                </form>
+              {% else %}
+                <span style="font-size:0.8rem; color:var(--text-muted);">Cleared</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="10" style="text-align:center; color:var(--text-muted);">No fine records found for this status.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

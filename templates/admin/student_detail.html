@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Details: {{ student.full_name }} - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">👤 {{ student.full_name }} ({{ student.roll_number }})</h1>
+    <p class="page-subtitle">{{ student.department }} Department &bull; Email: {{ student.email }} &bull; Phone: {{ student.phone }}</p>
+  </div>
+  <a href="{{ url_for('admin.students') }}" class="btn btn-outline">&larr; Back to Students</a>
+</div>
+
+<!-- Student Profile Overview Cards -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <span class="stat-label">Borrowing Permission</span>
+    <span class="stat-value" style="font-size:1.5rem;">
+      {% if student.borrowing_permission == 'GRANTED' %}
+        <span class="badge badge-granted">✓ GRANTED</span>
+      {% else %}
+        <span class="badge badge-revoked">✗ REVOKED</span>
+      {% endif %}
+    </span>
+    <span class="stat-desc">Managed by Administrator</span>
+  </div>
+
+  <div class="stat-card">
+    <span class="stat-label">Active Loans</span>
+    <span class="stat-value" style="font-size:1.5rem;">{{ student.active_books_count }} / 3</span>
+    <span class="stat-desc">Current physical books held</span>
+  </div>
+
+  <div class="stat-card {{ 'alert-card' if student.unpaid_fine_amount > 0 else 'success-card' }}">
+    <span class="stat-label">Outstanding Unpaid Fines</span>
+    <span class="stat-value" style="font-size:1.5rem;">₹{{ "%.2f"|format(student.unpaid_fine_amount) }}</span>
+    <span class="stat-desc">Must be settled to borrow</span>
+  </div>
+</div>
+
+<!-- Loan History -->
+<div class="card">
+  <div class="card-title">📖 Complete Circulation Record</div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Issue ID</th>
+          <th>Book Title</th>
+          <th>ISBN</th>
+          <th>Issue Date</th>
+          <th>Due Date</th>
+          <th>Return Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for loan in loans %}
+          <tr>
+            <td>#{{ loan.issue_id }}</td>
+            <td><strong>{{ loan.title }}</strong></td>
+            <td>{{ loan.isbn }}</td>
+            <td>{{ loan.issue_date }}</td>
+            <td>{{ loan.due_date }}</td>
+            <td>{{ loan.return_date or '—' }}</td>
+            <td>
+              {% if loan.status == 'RETURNED' %}
+                <span class="badge badge-returned">RETURNED</span>
+              {% elif loan.status == 'OVERDUE' %}
+                <span class="badge badge-overdue">OVERDUE</span>
+              {% else %}
+                <span class="badge badge-issued">ACTIVE</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="7" style="text-align:center; color:var(--text-muted);">No loan records on file for this student.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Fine Records -->
+<div class="card">
+  <div class="card-title">💰 Fine Audit Records</div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Fine ID</th>
+          <th>Associated Book</th>
+          <th>Issue Date</th>
+          <th>Return Date</th>
+          <th>Penalty Amount</th>
+          <th>Payment Status</th>
+          <th>Settlement Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in fines %}
+          <tr>
+            <td>#{{ f.fine_id }}</td>
+            <td>{{ f.title }}</td>
+            <td>{{ f.issue_date }}</td>
+            <td>{{ f.return_date }}</td>
+            <td><strong>₹{{ "%.2f"|format(f.fine_amount) }}</strong></td>
+            <td>
+              {% if f.payment_status == 'PAID' %}
+                <span class="badge badge-paid">PAID</span>
+              {% else %}
+                <span class="badge badge-unpaid">UNPAID</span>
+              {% endif %}
+            </td>
+            <td>{{ f.paid_date or 'Pending Payment' }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="7" style="text-align:center; color:var(--text-muted);">No fine records found. Clean record!</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

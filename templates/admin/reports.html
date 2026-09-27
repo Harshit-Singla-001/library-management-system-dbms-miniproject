@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}DBMS Analytical Reports - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">📈 Analytical SQL Reports &amp; Aggregations</h1>
+    <p class="page-subtitle">Demonstration of advanced relational queries: <code>JOIN</code>, <code>GROUP BY</code>, <code>HAVING</code>, Subqueries, and Aggregates</p>
+  </div>
+</div>
+
+<!-- Report 1: Top 5 Most Borrowed Books -->
+<div class="card">
+  <div class="card-title">
+    <span>🏆 Report 1: Most Frequently Borrowed Books (Popularity Index)</span>
+    <small style="color:var(--text-muted); font-size:0.8rem;">SQL: <code>LEFT JOIN</code> + <code>GROUP BY</code> + <code>ORDER BY DESC</code></small>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Book Title</th>
+          <th>Subject Category</th>
+          <th>Total Times Borrowed</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in top_books %}
+          <tr>
+            <td><strong>#{{ loop.index }}</strong></td>
+            <td><strong>{{ b.title }}</strong></td>
+            <td><span class="badge badge-info">{{ b.category_name }}</span></td>
+            <td><span class="badge badge-success">{{ b.borrow_count }} loans</span></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Report 2: Students with 3 Books (Borrowing Cap Limit) -->
+<div class="card">
+  <div class="card-title">
+    <span>🚫 Report 2: Students Holding Maximum 3 Active Books</span>
+    <small style="color:var(--text-muted); font-size:0.8rem;">SQL: <code>GROUP BY</code> + <code>HAVING COUNT(*) >= 3</code></small>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Roll Number</th>
+          <th>Student Name</th>
+          <th>Department</th>
+          <th>Active Books</th>
+          <th>Borrowing Eligibility</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in max_limit_students %}
+          <tr>
+            <td><strong>{{ s.roll_number }}</strong></td>
+            <td>{{ s.full_name }}</td>
+            <td>{{ s.department }}</td>
+            <td><span class="badge badge-danger">{{ s.active_books }} / 3 (Limit Reached)</span></td>
+            <td><span style="color:var(--danger); font-weight:600;">Blocked from further checkouts</span></td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="5" style="text-align:center; color:var(--text-muted);">No students are currently at the 3-book limit.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Report 3: Overdue Loans Audit -->
+<div class="card">
+  <div class="card-title">
+    <span>⚠️ Report 3: Active Overdue Loans &amp; Accruing Fine Estimates</span>
+    <small style="color:var(--text-muted); font-size:0.8rem;">SQL: <code>DATEDIFF(CURDATE(), due_date) * 5.00</code></small>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Issue ID</th>
+          <th>Roll Number</th>
+          <th>Student Name</th>
+          <th>Book Title</th>
+          <th>Issue Date</th>
+          <th>Due Date</th>
+          <th>Days Late</th>
+          <th>Estimated Accruing Penalty</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in overdue_loans %}
+          <tr>
+            <td>#{{ o.issue_id }}</td>
+            <td><strong>{{ o.roll_number }}</strong></td>
+            <td>{{ o.full_name }}</td>
+            <td>{{ o.title }}</td>
+            <td>{{ o.issue_date }}</td>
+            <td>{{ o.due_date }}</td>
+            <td><span class="badge badge-overdue">{{ o.days_overdue }} day(s) late</span></td>
+            <td><strong style="color:var(--danger);">₹{{ "%.2f"|format(o.fine_estimate) }}</strong></td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="8" style="text-align:center; color:var(--text-muted);">No active loans are currently overdue.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Report 4: Category Distribution -->
+<div class="card">
+  <div class="card-title">
+    <span>📊 Report 4: Subject Category Inventory Distribution</span>
+    <small style="color:var(--text-muted); font-size:0.8rem;">SQL: <code>COUNT(b.book_id)</code> + <code>SUM(b.total_copies)</code></small>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Category Name</th>
+          <th>Unique Book Titles</th>
+          <th>Total Physical Copies</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in category_dist %}
+          <tr>
+            <td><strong>{{ c.category_name }}</strong></td>
+            <td>{{ c.title_count }} titles</td>
+            <td><strong>{{ c.copy_count }} copies</strong></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Report 5: Students with Zero Borrowing History (Subquery Demo) -->
+<div class="card">
+  <div class="card-title">
+    <span>💤 Report 5: Students With Zero Borrowing History (Inactive Patrons)</span>
+    <small style="color:var(--text-muted); font-size:0.8rem;">SQL: Subquery with <code>WHERE student_id NOT IN (SELECT student_id FROM issued_books)</code></small>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Roll Number</th>
+          <th>Student Name</th>
+          <th>Department</th>
+          <th>Permission Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in non_borrowers %}
+          <tr>
+            <td><strong>{{ s.roll_number }}</strong></td>
+            <td>{{ s.full_name }}</td>
+            <td>{{ s.department }}</td>
+            <td>
+              {% if s.borrowing_permission == 'GRANTED' %}
+                <span class="badge badge-granted">GRANTED</span>
+              {% else %}
+                <span class="badge badge-revoked">REVOKED</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

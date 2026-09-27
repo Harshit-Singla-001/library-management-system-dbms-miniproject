@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Home{% endblock %} - Library Management System</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="{{ url_for('index') }}" class="nav-brand">
+        📚 Library Management System
+      </a>
+
+      {% if logged_in %}
+        <ul class="nav-links">
+          {% if user_role == 'ADMIN' %}
+            <li><a href="{{ url_for('admin.dashboard') }}" class="nav-link">Dashboard</a></li>
+            <li><a href="{{ url_for('admin.students') }}" class="nav-link">Students</a></li>
+            <li><a href="{{ url_for('admin.books') }}" class="nav-link">Books</a></li>
+            <li><a href="{{ url_for('admin.authors') }}" class="nav-link">Authors</a></li>
+            <li><a href="{{ url_for('admin.categories') }}" class="nav-link">Categories</a></li>
+            <li><a href="{{ url_for('admin.permissions') }}" class="nav-link" style="color:#fde047; font-weight:700;">🛡️ Permissions</a></li>
+            <li><a href="{{ url_for('admin.fines') }}" class="nav-link">Fines</a></li>
+            <li><a href="{{ url_for('admin.reports') }}" class="nav-link">Reports</a></li>
+          {% elif user_role == 'STUDENT' %}
+            <li><a href="{{ url_for('student.dashboard') }}" class="nav-link">Dashboard</a></li>
+            <li><a href="{{ url_for('student.books') }}" class="nav-link">Browse Books</a></li>
+            <li><a href="{{ url_for('student.return_page') }}" class="nav-link">Return Books</a></li>
+            <li><a href="{{ url_for('student.history') }}" class="nav-link">History</a></li>
+            <li><a href="{{ url_for('student.fines') }}" class="nav-link">My Fines</a></li>
+            <li><a href="{{ url_for('student.profile') }}" class="nav-link">Profile</a></li>
+          {% endif %}
+        </ul>
+
+        <div class="nav-user">
+          <div class="user-badge">
+            {% if user_role == 'ADMIN' %}
+              <span class="role-pill role-admin">Admin</span>
+            {% else %}
+              <span class="role-pill role-student">Student</span>
+              <span>{{ user_name }}</span>
+            {% endif %}
+          </div>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline" style="color:#fff; border-color:rgba(255,255,255,0.4);">Logout</a>
+        </div>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- Flash Messages & Page Body -->
+  <main class="main-wrapper">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="alert-container">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+              <span>{{ message }}</span>
+              <button class="alert-close" type="button">&times;</button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if not_found %}
+      <div class="card" style="text-align: center; padding: 3rem 1rem;">
+        <h2>404 - Page Not Found</h2>
+        <p style="color: var(--text-muted); margin: 1rem 0;">The requested library resource could not be found.</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Return to Home</a>
+      </div>
+    {% elif server_error %}
+      <div class="card" style="text-align: center; padding: 3rem 1rem;">
+        <h2>500 - Internal Server Error</h2>
+        <p style="color: var(--text-muted); margin: 1rem 0;">An unexpected error occurred in the database or server.</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Return to Home</a>
+      </div>
+    {% else %}
+      {% block content %}{% endblock %}
+    {% endif %}
+  </main>
+
+  <!-- Collegiate Footer -->
+  <footer class="footer">
+    <p>
+      <span class="footer-highlight">Library Management System</span> | College DBMS Practical Demonstration
+      &bull; Powered by MySQL 8.0 &amp; Python Flask &bull; {{ current_year }}
+    </p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Return Books - Student Portal{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">↩️ Return Issued Books</h1>
+    <p class="page-subtitle">Check in your active books. Overdue returns incur a fine rate of <strong>₹{{ "%.2f"|format(daily_rate) }}/day</strong></p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Currently Held Books Eligible for Return</div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Issue ID</th>
+          <th>Book Title</th>
+          <th>ISBN</th>
+          <th>Issue Date</th>
+          <th>Due Date</th>
+          <th>Status / Timing</th>
+          <th>Penalty Assessment</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for loan in active_loans %}
+          <tr>
+            <td>#{{ loan.issue_id }}</td>
+            <td><strong>{{ loan.title }}</strong></td>
+            <td><code>{{ loan.isbn }}</code></td>
+            <td>{{ loan.issue_date }}</td>
+            <td><strong>{{ loan.due_date }}</strong></td>
+            <td>
+              {% if loan.overdue_days > 0 %}
+                <span class="badge badge-overdue">⚠️ {{ loan.overdue_days }} Day(s) Overdue</span>
+              {% else %}
+                <span class="badge badge-success">On Schedule</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if loan.overdue_days > 0 %}
+                <strong style="color:var(--danger);">
+                  Fine: ₹{{ "%.2f"|format(loan.overdue_days * daily_rate) }}
+                </strong>
+                <br><small style="color:var(--text-muted);">{{ loan.overdue_days }} days &times; ₹{{ "%.2f"|format(daily_rate) }}</small>
+              {% else %}
+                <span style="color:var(--success); font-weight:600;">₹0.00 (No Fine)</span>
+              {% endif %}
+            </td>
+            <td>
+              <form method="POST" action="{{ url_for('student.process_return', issue_id=loan.issue_id) }}"
+                    onsubmit="return confirmAction('Confirm check-in of &quot;{{ loan.title }}&quot;?');">
+                <button type="submit" class="btn btn-sm btn-primary">
+                  ↩️ Return to Library
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="8" style="text-align:center; color:var(--text-muted); padding:3rem;">
+              You do not have any books currently checked out.
+              <br><br>
+              <a href="{{ url_for('student.books') }}" class="btn btn-primary">Browse Catalog to Borrow</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
