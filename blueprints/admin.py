@@ -16,15 +16,20 @@ def dashboard():
         SELECT
             (SELECT COUNT(*) FROM students) AS total_students,
             (SELECT COUNT(*) FROM books) AS total_titles,
-            (SELECT COALESCE(SUM(total_copies), 0) FROM books) AS total_inventory,
-            (SELECT COALESCE(SUM(available_copies), 0) FROM books) AS available_inventory,
+            (SELECT SUM(total_copies) FROM books) AS total_inventory,
+            (SELECT SUM(available_copies) FROM books) AS available_inventory,
             (SELECT COUNT(*) FROM issued_books WHERE status IN ('ISSUED', 'OVERDUE')) AS active_loans,
             (SELECT COUNT(*) FROM issued_books WHERE status = 'OVERDUE' OR (status = 'ISSUED' AND due_date < CURDATE())) AS overdue_loans,
             (SELECT COUNT(*) FROM students WHERE borrowing_permission = 'GRANTED') AS granted_students,
             (SELECT COUNT(*) FROM students WHERE borrowing_permission = 'REVOKED') AS revoked_students,
             (SELECT COUNT(DISTINCT student_id) FROM fines WHERE payment_status = 'UNPAID') AS students_with_fines,
-            (SELECT COALESCE(SUM(fine_amount), 0.00) FROM fines WHERE payment_status = 'UNPAID') AS total_unpaid_fines
+            (SELECT SUM(fine_amount) FROM fines WHERE payment_status = 'UNPAID') AS total_unpaid_fines
     """, one=True)
+
+    if stats:
+        stats['total_inventory'] = stats['total_inventory'] or 0
+        stats['available_inventory'] = stats['available_inventory'] or 0
+        stats['total_unpaid_fines'] = float(stats['total_unpaid_fines'] or 0.0)
 
     # Students currently holding 3 books (maximum limit)
     max_borrowers = query_db("""
@@ -64,7 +69,7 @@ def students():
     sql = """
         SELECT s.student_id, s.roll_number, s.full_name, s.email, s.phone, s.department, s.borrowing_permission,
                (SELECT COUNT(*) FROM issued_books ib WHERE ib.student_id = s.student_id AND ib.status IN ('ISSUED', 'OVERDUE')) AS active_books,
-               (SELECT COALESCE(SUM(f.fine_amount), 0.00) FROM fines f WHERE f.student_id = s.student_id AND f.payment_status = 'UNPAID') AS unpaid_fine
+               (SELECT SUM(f.fine_amount) FROM fines f WHERE f.student_id = s.student_id AND f.payment_status = 'UNPAID') AS unpaid_fine
         FROM students s
         WHERE 1=1
     """
@@ -78,6 +83,8 @@ def students():
 
     sql += " ORDER BY s.roll_number ASC"
     student_list = query_db(sql, params)
+    for s in student_list:
+        s['unpaid_fine'] = float(s.get('unpaid_fine') or 0.0)
     departments = query_db("SELECT DISTINCT department FROM students ORDER BY department ASC")
 
     return render_template('admin/students.html', students=student_list, departments=departments, search=search, selected_dept=dept)
@@ -196,38 +203,42 @@ def delete_student(student_id):
 
     return redirect(url_for('admin.students'))
 
-@admin_bp.route('/students/view/<int:student_id>')
+@admin_bp.route('/students/view/<student_id>')
 @admin_required
 def view_student(student_id):
     student = query_db("""
         SELECT s.*, u.username,
                (SELECT COUNT(*) FROM issued_books ib WHERE ib.student_id = s.student_id AND ib.status IN ('ISSUED', 'OVERDUE')) AS active_books_count,
-               (SELECT COALESCE(SUM(fine_amount), 0.00) FROM fines f WHERE f.student_id = s.student_id AND f.payment_status = 'UNPAID') AS unpaid_fine_amount
+               (SELECT SUM(fine_amount) FROM fines f WHERE f.student_id = s.student_id AND f.payment_status = 'UNPAID') AS unpaid_fine_amount
         FROM students s
         JOIN users u ON s.user_id = u.user_id
-        WHERE s.student_id = %s
-    """, (student_id,), one=True)
+        WHERE s.roll_number = %s OR s.student_id = %s
+    """, (str(student_id), str(student_id)), one=True)
 
     if not student:
         flash('Student not found.', 'danger')
         return redirect(url_for('admin.students'))
 
+    student['unpaid_fine_amount'] = float(student.get('unpaid_fine_amount') or 0.0)
+    roll = student['roll_number']
     loans = query_db("""
         SELECT ib.*, b.title, b.isbn 
         FROM issued_books ib 
         JOIN books b ON ib.book_id = b.book_id 
-        WHERE ib.student_id = %s 
+        JOIN students s ON ib.student_id = s.student_id
+        WHERE s.roll_number = %s 
         ORDER BY ib.issue_id DESC
-    """, (student_id,))
+    """, (roll,))
 
     fines = query_db("""
         SELECT f.*, b.title, ib.issue_date, ib.return_date 
         FROM fines f 
         JOIN issued_books ib ON f.issue_id = ib.issue_id 
         JOIN books b ON ib.book_id = b.book_id 
-        WHERE f.student_id = %s 
+        JOIN students s ON f.student_id = s.student_id
+        WHERE s.roll_number = %s 
         ORDER BY f.fine_id DESC
-    """, (student_id,))
+    """, (roll,))
 
     return render_template('admin/student_detail.html', student=student, loans=loans, fines=fines)
 
@@ -476,7 +487,7 @@ def permissions():
     sql = """
         SELECT s.student_id, s.roll_number, s.full_name, s.department, s.borrowing_permission,
                (SELECT COUNT(*) FROM issued_books ib WHERE ib.student_id = s.student_id AND ib.status IN ('ISSUED', 'OVERDUE')) AS active_books,
-               (SELECT COALESCE(SUM(f.fine_amount), 0.00) FROM fines f WHERE f.student_id = s.student_id AND f.payment_status = 'UNPAID') AS unpaid_fine
+               (SELECT SUM(f.fine_amount) FROM fines f WHERE f.student_id = s.student_id AND f.payment_status = 'UNPAID') AS unpaid_fine
         FROM students s
         WHERE 1=1
     """
@@ -490,6 +501,8 @@ def permissions():
 
     sql += " ORDER BY s.roll_number ASC"
     student_list = query_db(sql, params)
+    for s in student_list:
+        s['unpaid_fine'] = float(s.get('unpaid_fine') or 0.0)
 
     return render_template('admin/permissions.html', students=student_list, search=search, perm_filter=perm_filter)
 
@@ -535,8 +548,10 @@ def fines():
     sql += " ORDER BY f.fine_id DESC"
     fines_list = query_db(sql, params)
 
-    total_unpaid = query_db("SELECT COALESCE(SUM(fine_amount), 0.00) AS total FROM fines WHERE payment_status = 'UNPAID'", one=True)['total']
-    total_collected = query_db("SELECT COALESCE(SUM(fine_amount), 0.00) AS total FROM fines WHERE payment_status = 'PAID'", one=True)['total']
+    unpaid_row = query_db("SELECT SUM(fine_amount) AS total FROM fines WHERE payment_status = 'UNPAID'", one=True)
+    paid_row = query_db("SELECT SUM(fine_amount) AS total FROM fines WHERE payment_status = 'PAID'", one=True)
+    total_unpaid = float((unpaid_row['total'] if unpaid_row else None) or 0.00)
+    total_collected = float((paid_row['total'] if paid_row else None) or 0.00)
 
     return render_template('admin/fines.html', fines=fines_list, status_filter=status_filter, total_unpaid=total_unpaid, total_collected=total_collected)
 
@@ -587,7 +602,7 @@ def reports():
 
     # Report 4: Category Distribution
     category_dist = query_db("""
-        SELECT c.category_name, COUNT(b.book_id) AS title_count, COALESCE(SUM(b.total_copies), 0) AS copy_count
+        SELECT c.category_name, COUNT(b.book_id) AS title_count, SUM(b.total_copies) AS copy_count
         FROM categories c
         LEFT JOIN books b ON c.category_id = b.category_id
         GROUP BY c.category_id, c.category_name

@@ -92,6 +92,158 @@
     </p>
   </footer>
 
+  <!-- Floating SQL Console Toggle Button (Bottom-Right) -->
+  <button type="button" class="sql-floating-fab" id="sqlFabBtn" onclick="toggleSqlDrawer()" title="Inspect SQL Queries used on this page (Split View)">
+    <span class="fab-icon">⚡</span>
+    <span class="fab-text">View SQL Query</span>
+    <span class="fab-badge">{{ page_sql_queries|length }}</span>
+  </button>
+
+  <!-- Split View Bottom Docked SQL Console (Non-blocking, Page Table remains 100% visible) -->
+  <div id="sqlConsoleDrawer" class="sql-console-drawer">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <span class="drawer-icon">⚡</span>
+        <span class="drawer-title">Live SQL Console</span>
+        <span class="meta-tag meta-route">{{ request.path }}</span>
+        <span class="meta-tag meta-count">{{ page_sql_queries|length }} {% if page_sql_queries|length == 1 %}Query{% else %}Queries{% endif %}</span>
+        {% if user_roll %}
+          <span class="meta-tag meta-roll">Student Roll: <strong>{{ user_roll }}</strong></span>
+        {% endif %}
+      </div>
+      <div class="drawer-controls">
+        <button type="button" class="btn-drawer-ctrl" id="btnToggleSyllabus" onclick="toggleSyllabusGuide()" title="DBMS Syllabus Reference Guide">
+          ℹ️ Syllabus Topics
+        </button>
+        <button type="button" class="btn-drawer-ctrl" id="btnExpandDrawer" onclick="toggleExpandDrawer()" title="Expand / Shrink Height">
+          ⤢ Expand
+        </button>
+        <button type="button" class="btn-drawer-ctrl btn-close-drawer" onclick="toggleSqlDrawer(false)" title="Hide Console">
+          ✕ Hide
+        </button>
+      </div>
+    </div>
+
+    <!-- Syllabus Mapping Guide Box -->
+    <div id="syllabusGuideBox" class="syllabus-guide-box" style="display: none;">
+      <div class="syllabus-grid">
+        <div class="syllabus-col">
+          <strong>Task 2:</strong> Data Types, SELECT Statements, Conditional WHERE clauses
+        </div>
+        <div class="syllabus-col">
+          <strong>Task 3:</strong> Aggregate Functions (COUNT, SUM), Pattern Matching (LIKE), ORDER BY, GROUP BY
+        </div>
+        <div class="syllabus-col">
+          <strong>Task 4:</strong> Table Joins (INNER, LEFT JOIN), Nested Queries (Subqueries)
+        </div>
+        <div class="syllabus-col">
+          <strong>Task 5:</strong> Security Privileges (GRANT/REVOKE), Transactions (COMMIT/ROLLBACK)
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-body">
+      {% if recent_action_queries and recent_action_queries.queries %}
+        <div class="sql-action-banner">
+          <div class="action-banner-header">
+            <span class="badge-mutation">{{ recent_action_queries.method }} Action</span>
+            <strong>Previous Mutation Queries:</strong> <code>{{ recent_action_queries.endpoint }}</code>
+          </div>
+          <div class="sql-cards-list">
+            {% for q in recent_action_queries.queries %}
+              <div class="sql-card mutation-card">
+                <div class="sql-card-header">
+                  <div class="sql-card-badges">
+                    <span class="sql-type-badge badge-{{ q.type|lower }}">{{ q.type }}</span>
+                    <span class="sql-index">#{{ loop.index }}</span>
+                    <span class="sql-time">⏱ {{ q.duration_ms }} ms</span>
+                    {% if q.error %}<span class="badge-error">Error</span>{% endif %}
+                  </div>
+                  <div class="card-action-btns">
+                    <button type="button" class="btn-info-query" onclick="toggleQueryInfo(this)" title="View Query Description &amp; Syllabus Concepts">
+                      ℹ️ Info
+                    </button>
+                    <button type="button" class="btn-copy-sql" onclick="copySqlFromElement(this)">
+                      📋 Copy SQL
+                    </button>
+                  </div>
+                </div>
+                <!-- Dynamic Query Details Box -->
+                <div class="query-info-box" style="display: none;">
+                  <div class="info-item">
+                    <strong>Query Description:</strong> {{ q.description }}
+                  </div>
+                  <div class="info-item">
+                    <strong>SQL Concepts:</strong>
+                    <span class="syllabus-pill">{{ q.classification }}</span>
+                    {% if q.date_note %}
+                      <span class="syllabus-pill-date">{{ q.date_note }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="sql-code-wrapper">
+                  <pre class="sql-code"><code>{{ q.query }}</code></pre>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="sql-section-title">
+        <span>📄 Active Page Queries ({{ page_sql_queries|length }})</span>
+        <span class="split-hint">&bull; Table is visible above &bull; Click "ℹ️ Info" or block badges to inspect concepts</span>
+      </div>
+
+      {% if page_sql_queries and page_sql_queries|length > 0 %}
+        <div class="sql-cards-list">
+          {% for q in page_sql_queries %}
+            <div class="sql-card" id="sql-card-{{ loop.index }}">
+              <div class="sql-card-header">
+                <div class="sql-card-badges">
+                  <span class="sql-type-badge badge-{{ q.type|lower }}">{{ q.type }}</span>
+                  <span class="sql-index">Query #{{ loop.index }}</span>
+                  <span class="sql-time">⏱ {{ q.duration_ms }} ms</span>
+                  {% if q.error %}<span class="badge-error">{{ q.error }}</span>{% endif %}
+                </div>
+                <div class="card-action-btns">
+                  <button type="button" class="btn-info-query" onclick="toggleQueryInfo(this)" title="View Query Description &amp; SQL Classification">
+                    ℹ️ Info
+                  </button>
+                  <button type="button" class="btn-copy-sql" onclick="copySqlFromElement(this)">
+                    📋 Copy SQL
+                  </button>
+                </div>
+              </div>
+              <!-- Dynamic Query Details Box -->
+              <div class="query-info-box" id="query-info-{{ loop.index }}" style="display: none;">
+                <div class="info-item">
+                  <strong>Query Description:</strong> {{ q.description }}
+                </div>
+                <div class="info-item">
+                  <strong>SQL Concepts:</strong>
+                  <span class="syllabus-pill">{{ q.classification }}</span>
+                  {% if q.date_note %}
+                    <span class="syllabus-pill-date">{{ q.date_note }}</span>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="sql-code-wrapper">
+                <pre class="sql-code"><code>{{ q.query }}</code></pre>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="sql-empty-notice">
+          <div class="empty-icon">📂</div>
+          <h4>No Database Queries on this Page</h4>
+          <p>This view was rendered statically without requiring an active database query.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
   {% block scripts %}{% endblock %}
 </body>

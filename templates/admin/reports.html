@@ -13,7 +13,12 @@
 <!-- Report 1: Top 5 Most Borrowed Books -->
 <div class="card">
   <div class="card-title">
-    <span>🏆 Report 1: Most Frequently Borrowed Books (Popularity Index)</span>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span>🏆 Report 1: Most Frequently Borrowed Books (Popularity Index)</span>
+      <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(1)" title="Inspect SQL Query #1">
+        ⚡ SQL Query #1
+      </button>
+    </div>
     <small style="color:var(--text-muted); font-size:0.8rem;">SQL: <code>LEFT JOIN</code> + <code>GROUP BY</code> + <code>ORDER BY DESC</code></small>
   </div>
   <div class="table-responsive">
@@ -41,9 +46,14 @@
 </div>
 
 <!-- Report 2: Students with 3 Books (Borrowing Cap Limit) -->
-<div class="card">
+<div class="card" id="report-max-limit">
   <div class="card-title">
-    <span>🚫 Report 2: Students Holding Maximum 3 Active Books</span>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span>🚫 Report 2: Students Holding Maximum 3 Active Books</span>
+      <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(2)" title="Inspect SQL Query #2">
+        ⚡ SQL Query #2
+      </button>
+    </div>
     <small style="color:var(--text-muted); font-size:0.8rem;">SQL: <code>GROUP BY</code> + <code>HAVING COUNT(*) >= 3</code></small>
   </div>
   <div class="table-responsive">
@@ -77,9 +87,14 @@
 </div>
 
 <!-- Report 3: Overdue Loans Audit -->
-<div class="card">
+<div class="card" id="report-overdue">
   <div class="card-title">
-    <span>⚠️ Report 3: Active Overdue Loans &amp; Accruing Fine Estimates</span>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span>⚠️ Report 3: Active Overdue Loans &amp; Accruing Fine Estimates</span>
+      <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(3)" title="Inspect SQL Query #3">
+        ⚡ SQL Query #3
+      </button>
+    </div>
     <small style="color:var(--text-muted); font-size:0.8rem;">SQL: <code>DATEDIFF(CURDATE(), due_date) * 5.00</code></small>
   </div>
   <div class="table-responsive">
@@ -121,7 +136,12 @@
 <!-- Report 4: Category Distribution -->
 <div class="card">
   <div class="card-title">
-    <span>📊 Report 4: Subject Category Inventory Distribution</span>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span>📊 Report 4: Subject Category Inventory Distribution</span>
+      <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(4)" title="Inspect SQL Query #4">
+        ⚡ SQL Query #4
+      </button>
+    </div>
     <small style="color:var(--text-muted); font-size:0.8rem;">SQL: <code>COUNT(b.book_id)</code> + <code>SUM(b.total_copies)</code></small>
   </div>
   <div class="table-responsive">
@@ -149,7 +169,12 @@
 <!-- Report 5: Students with Zero Borrowing History (Subquery Demo) -->
 <div class="card">
   <div class="card-title">
-    <span>💤 Report 5: Students With Zero Borrowing History (Inactive Patrons)</span>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span>💤 Report 5: Students With Zero Borrowing History (Inactive Patrons)</span>
+      <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(5)" title="Inspect SQL Query #5">
+        ⚡ SQL Query #5
+      </button>
+    </div>
     <small style="color:var(--text-muted); font-size:0.8rem;">SQL: Subquery with <code>WHERE student_id NOT IN (SELECT student_id FROM issued_books)</code></small>
   </div>
   <div class="table-responsive">

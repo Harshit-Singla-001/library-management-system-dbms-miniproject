@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, session, render_template
+from flask import Flask, redirect, url_for, session, render_template, request, g
 from config import Config
 from blueprints.auth import auth_bp
 from blueprints.admin import admin_bp
@@ -24,14 +24,29 @@ def create_app():
                 return redirect(url_for('student.dashboard'))
         return redirect(url_for('auth.login'))
 
+    @app.after_request
+    def preserve_post_queries(response):
+        """Preserve SQL queries from POST/mutation requests across redirects."""
+        if request.method in ('POST', 'PUT', 'DELETE') and hasattr(g, 'sql_queries') and g.sql_queries:
+            session['_last_action_queries'] = {
+                'endpoint': request.path,
+                'method': request.method,
+                'queries': list(g.sql_queries)
+            }
+        return response
+
     @app.context_processor
     def inject_global_data():
-        """Inject current year and session user details globally to all templates."""
+        """Inject current year, session user details, and SQL queries globally to all templates."""
+        recent_action = session.pop('_last_action_queries', None)
         return {
             'current_year': datetime.now().year,
             'logged_in': 'user_id' in session,
             'user_role': session.get('role'),
-            'user_name': session.get('full_name') or session.get('username')
+            'user_name': session.get('full_name') or session.get('username'),
+            'user_roll': session.get('roll_number'),
+            'page_sql_queries': getattr(g, 'sql_queries', []),
+            'recent_action_queries': recent_action
         }
 
     @app.errorhandler(404)

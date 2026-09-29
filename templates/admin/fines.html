@@ -39,6 +39,14 @@
 </div>
 
 <div class="card">
+  <div class="card-title">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span>💰 Fine Records Ledger ({{ fines|length }})</span>
+      <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(1)" title="Inspect SQL Query #1 powering fines ledger">
+        ⚡ SQL Query #1
+      </button>
+    </div>
+  </div>
   <div class="table-responsive">
     <table class="data-table">
       <thead>

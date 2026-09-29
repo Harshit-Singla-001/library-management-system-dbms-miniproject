@@ -152,10 +152,10 @@ SELECT
     s.`roll_number`,
     s.`full_name`,
     s.`borrowing_permission`,
-    COALESCE(b.`title`, 'No Active Book') AS borrowed_book,
+    b.`title` AS borrowed_book,
     ib.`issue_date`,
     ib.`due_date`,
-    COALESCE(ib.`status`, 'N/A') AS loan_status
+    ib.`status` AS loan_status
 FROM `students` s
 LEFT JOIN `issued_books` ib ON s.`student_id` = ib.`student_id` AND ib.`status` IN ('ISSUED', 'OVERDUE')
 LEFT JOIN `books` b ON ib.`book_id` = b.`book_id`
@@ -166,8 +166,8 @@ SELECT
     s.`roll_number`,
     s.`full_name`,
     COUNT(f.`fine_id`) AS total_fines_incurred,
-    COALESCE(SUM(CASE WHEN f.`payment_status` = 'UNPAID' THEN f.`fine_amount` ELSE 0 END), 0.00) AS total_unpaid_fines,
-    COALESCE(SUM(CASE WHEN f.`payment_status` = 'PAID' THEN f.`fine_amount` ELSE 0 END), 0.00) AS total_paid_fines
+    SUM(CASE WHEN f.`payment_status` = 'UNPAID' THEN f.`fine_amount` ELSE 0 END) AS total_unpaid_fines,
+    SUM(CASE WHEN f.`payment_status` = 'PAID' THEN f.`fine_amount` ELSE 0 END) AS total_paid_fines
 FROM `students` s
 LEFT JOIN `fines` f ON s.`student_id` = f.`student_id`
 GROUP BY s.`student_id`, s.`roll_number`, s.`full_name`
@@ -215,7 +215,7 @@ SELECT
     s.`full_name`,
     s.`borrowing_permission`,
     (SELECT COUNT(*) FROM `issued_books` ib WHERE ib.`student_id` = s.`student_id` AND ib.`status` IN ('ISSUED', 'OVERDUE')) AS active_books_count,
-    (SELECT COALESCE(SUM(`fine_amount`), 0.00) FROM `fines` f WHERE f.`student_id` = s.`student_id` AND f.`payment_status` = 'UNPAID') AS unpaid_fine_amount
+    (SELECT SUM(`fine_amount`) FROM `fines` f WHERE f.`student_id` = s.`student_id` AND f.`payment_status` = 'UNPAID') AS unpaid_fine_amount
 FROM `students` s
 ORDER BY active_books_count DESC, s.`roll_number` ASC;
 

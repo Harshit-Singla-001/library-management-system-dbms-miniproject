@@ -8,67 +8,84 @@
     <h1 class="page-title">Admin Dashboard</h1>
     <p class="page-subtitle">Real-time circulation metrics and database-driven statistics</p>
   </div>
-  <div style="display: flex; gap: 0.5rem;">
-    <a href="{{ url_for('admin.permissions') }}" class="btn btn-warning">🛡️ Manage Permissions</a>
+  <div>
     <a href="{{ url_for('admin.add_book') }}" class="btn btn-primary">+ Add New Book</a>
   </div>
 </div>
 
-<!-- Primary KPI Metric Cards Grid -->
+<!-- Primary KPI Metric Cards Grid Header -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+  <span style="font-weight: 700; color: var(--text-muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em;">Live Circulation &amp; System Performance Overview</span>
+  <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(1)" title="Inspect SQL Query #1 powering System KPIs">
+    ⚡ SQL Query #1
+  </button>
+</div>
+
+<!-- Primary KPI Metric Cards Grid (All Cards Clickable with Live Redirection) -->
 <div class="stats-grid">
-  <div class="stat-card">
+  <a href="{{ url_for('admin.students') }}" class="stat-card" title="View Registered Students Directory">
     <span class="stat-label">Total Registered Students</span>
     <span class="stat-value">{{ stats.total_students }}</span>
     <span class="stat-desc">{{ stats.granted_students }} Granted &bull; {{ stats.revoked_students }} Revoked</span>
-  </div>
+  </a>
 
-  <div class="stat-card">
+  <a href="{{ url_for('admin.books') }}" class="stat-card" title="View Book Titles &amp; Catalog">
     <span class="stat-label">Total Unique Book Titles</span>
     <span class="stat-value">{{ stats.total_titles }}</span>
     <span class="stat-desc">{{ stats.total_inventory }} Total Physical Copies</span>
-  </div>
+  </a>
 
-  <div class="stat-card success-card">
+  <a href="{{ url_for('admin.books') }}" class="stat-card success-card" title="View Available Shelf Copies">
     <span class="stat-label">Available on Shelves</span>
     <span class="stat-value">{{ stats.available_inventory }}</span>
     <span class="stat-desc">Ready for immediate checkout</span>
-  </div>
+  </a>
 
-  <div class="stat-card">
+  <a href="{{ url_for('admin.reports') }}" class="stat-card" title="View Currently Issued Loans in Reports">
     <span class="stat-label">Currently Issued Loans</span>
     <span class="stat-value">{{ stats.active_loans }}</span>
     <span class="stat-desc">Books currently with students</span>
-  </div>
+  </a>
 
-  <div class="stat-card alert-card">
+  <a href="{{ url_for('admin.reports') }}#report-overdue" class="stat-card alert-card" title="View Overdue Loans Audit in Reports">
     <span class="stat-label">Overdue Loans</span>
     <span class="stat-value">{{ stats.overdue_loans }}</span>
     <span class="stat-desc">Past 14-day loan return deadline</span>
-  </div>
+  </a>
 
-  <div class="stat-card warning-card">
-    <span class="stat-label">Students at 3-Book Limit</span>
+  <a href="{{ url_for('admin.reports') }}#report-max-limit" class="stat-card warning-card" title="View Students at 3-Book Limit">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
+      <span class="stat-label">Students at 3-Book Limit</span>
+      <button type="button" class="btn-block-sql" onclick="event.preventDefault(); event.stopPropagation(); inspectQueryNumber(2);" title="Inspect SQL Query #2 for 3-Book Limit Check">
+        ⚡ Query #2
+      </button>
+    </div>
     <span class="stat-value">{{ max_borrowers }}</span>
     <span class="stat-desc">Cannot borrow further books</span>
-  </div>
+  </a>
 
-  <div class="stat-card alert-card">
+  <a href="{{ url_for('admin.permissions', permission='REVOKED') }}" class="stat-card alert-card" title="Manage Revoked Student Permissions">
     <span class="stat-label">Revoked Permissions</span>
     <span class="stat-value">{{ stats.revoked_students }}</span>
     <span class="stat-desc">Borrowing access suspended</span>
-  </div>
+  </a>
 
-  <div class="stat-card alert-card">
+  <a href="{{ url_for('admin.fines', status='UNPAID') }}" class="stat-card alert-card" title="Manage Outstanding Unpaid Fines">
     <span class="stat-label">Total Unpaid Fines</span>
     <span class="stat-value">₹{{ "%.2f"|format(stats.total_unpaid_fines) }}</span>
     <span class="stat-desc">{{ stats.students_with_fines }} students with pending dues</span>
-  </div>
+  </a>
 </div>
 
 <!-- Recent Circulation Activity Table -->
 <div class="card">
   <div class="card-title">
-    <span>📋 Recent Circulation Activity</span>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span>📋 Recent Circulation Activity</span>
+      <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(3)" title="Inspect SQL Query #3 powering Recent Activity Table">
+        ⚡ SQL Query #3
+      </button>
+    </div>
     <a href="{{ url_for('admin.reports') }}" class="btn btn-sm btn-outline">View Comprehensive Reports &rarr;</a>
   </div>
   <div class="table-responsive">
