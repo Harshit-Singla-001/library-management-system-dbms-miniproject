@@ -8,10 +8,22 @@
     <h1 class="page-title">↩️ Return Issued Books</h1>
     <p class="page-subtitle">Check in your active books. Overdue returns incur a fine rate of <strong>₹{{ "%.2f"|format(daily_rate) }}/day</strong></p>
   </div>
+  <div>
+    <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(1)" title="Inspect SQL Query #1 for Student Account Status">
+      ⚡ SQL Query #1
+    </button>
+  </div>
 </div>
 
 <div class="card">
-  <div class="card-title">Currently Held Books Eligible for Return</div>
+  <div class="card-title">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span>Currently Held Books Eligible for Return ({{ active_loans|length }})</span>
+      <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(2)" title="Inspect SQL Query #2 for Eligible Loans &amp; Overdue Penalty Calculation">
+        ⚡ SQL Query #2
+      </button>
+    </div>
+  </div>
   <div class="table-responsive">
     <table class="data-table">
       <thead>

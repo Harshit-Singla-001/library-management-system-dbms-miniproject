@@ -22,6 +22,10 @@
     {% endfor %}
   </select>
 
+  <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(2)" title="Inspect SQL Query #2 for Distinct Departments Lookup">
+    ⚡ SQL Query #2
+  </button>
+
   <button type="submit" class="btn btn-primary">Search</button>
   {% if search or selected_dept %}
     <a href="{{ url_for('admin.students') }}" class="btn btn-outline">Clear</a>

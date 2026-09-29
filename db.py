@@ -97,6 +97,24 @@ def analyze_sql_query(sql_text):
         desc = "Catalog Query: Searches book collection joined with categories, authors, and real-time shelf copy availability."
     elif "FROM BOOKS B" in upper_sql and "WHERE 1=1" in upper_sql:
         desc = "Book Inventory Query: Searches books with category joins and copy tracking."
+    elif "FROM AUTHORS A" in upper_sql and "BOOK_COUNT" in upper_sql:
+        desc = "Author Directory Query: Fetches author profiles joined with book_authors junction table to aggregate published titles count."
+    elif "FROM CATEGORIES C" in upper_sql and "BOOK_COUNT" in upper_sql:
+        desc = "Category Taxonomy Query: Fetches academic categories joined with book catalog to compute subject distribution."
+    elif "SELECT DISTINCT DEPARTMENT FROM STUDENTS" in upper_sql:
+        desc = "Department Filter Query: Retrieves unique institutional departments for directory filtering."
+    elif "FROM CATEGORIES" in upper_sql and "ORDER BY CATEGORY_NAME" in upper_sql:
+        desc = "Category Options Query: Fetches alphabetical category taxonomy to populate catalog dropdown filters."
+    elif "FROM FINES" in upper_sql and "SUM(FINE_AMOUNT)" in upper_sql and "PAYMENT_STATUS = 'UNPAID'" in upper_sql:
+        desc = "Institutional Unpaid Dues: Computes cumulative pending fine revenue across all student accounts."
+    elif "FROM FINES" in upper_sql and "SUM(FINE_AMOUNT)" in upper_sql and "PAYMENT_STATUS = 'PAID'" in upper_sql:
+        desc = "Institutional Settled Dues: Computes cumulative penalty revenue successfully settled and collected."
+    elif "FROM ISSUED_BOOKS IB" in upper_sql and "OVERDUE_DAYS" in upper_sql:
+        desc = "Return Eligibility Query: Retrieves active loans for check-in with dynamic overdue days and fine assessments."
+    elif "FROM FINES F" in upper_sql and "JOIN ISSUED_BOOKS" in upper_sql and ("STUDENTS S" in upper_sql or "S.ROLL_NUMBER" in upper_sql):
+        desc = "Personal Fine Ledger: Retrieves itemized penalty records and settlement status for this student."
+    elif "FROM BOOKS B" in upper_sql and "ALREADY_ISSUED" in upper_sql:
+        desc = "Catalog & Eligibility Query: Searches catalog joined with student active loans to detect already-held copies."
     elif "FROM FINES F" in upper_sql and "WHERE 1=1" in upper_sql:
         desc = "Fine Ledger Query: Fetches fine records joined with student and book loan details."
     elif "FROM FINES F" in upper_sql and "PAYMENT_STATUS = 'UNPAID'" in upper_sql:

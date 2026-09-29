@@ -8,14 +8,17 @@
     <h1 class="page-title">📖 Library Catalog &amp; Self-Service Checkout</h1>
     <p class="page-subtitle">Search titles, verify real-time copy availability, and issue books to your account</p>
   </div>
-  <div>
+  <div style="display: flex; align-items: center; gap: 0.5rem;">
     <span class="badge {{ 'badge-granted' if student.effective_permission == 'GRANTED' else 'badge-revoked' }}" 
           title="{{ student.permission_reason }}" style="cursor: help;">
       Borrowing: {{ student.effective_permission }}
     </span>
-    <span class="badge badge-info" style="margin-left: 0.4rem;">
+    <span class="badge badge-info">
       Loans: {{ student.active_books }} / 3
     </span>
+    <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(1)" title="Inspect SQL Query #1 for Student Permission &amp; Borrowing Eligibility">
+      ⚡ SQL Query #1
+    </button>
   </div>
 </div>
 
@@ -32,6 +35,10 @@
     {% endfor %}
   </select>
 
+  <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(3)" title="Inspect SQL Query #3 for Category Dropdown Filter">
+    ⚡ SQL Query #3
+  </button>
+
   <button type="submit" class="btn btn-primary">Search</button>
   {% if search or selected_cat %}
     <a href="{{ url_for('student.books') }}" class="btn btn-outline">Clear</a>
@@ -39,6 +46,14 @@
 </form>
 
 <div class="card">
+  <div class="card-title">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span>📖 Available Book Catalog ({{ books|length }} Titles)</span>
+      <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(2)" title="Inspect SQL Query #2 powering Book Catalog &amp; Real-time Availability">
+        ⚡ SQL Query #2
+      </button>
+    </div>
+  </div>
   <div class="table-responsive">
     <table class="data-table">
       <thead>

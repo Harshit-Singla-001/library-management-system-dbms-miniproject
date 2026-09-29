@@ -13,7 +13,12 @@
 <!-- Student Fine Status Cards -->
 <div class="stats-grid">
   <div class="stat-card {{ 'alert-card' if student.unpaid_fine > 0 else 'success-card' }}">
-    <span class="stat-label">Outstanding Unpaid Fines</span>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
+      <span class="stat-label">Outstanding Unpaid Fines</span>
+      <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(1)" title="Inspect SQL Query #1 for Student Live Outstanding Fines Calculation">
+        ⚡ SQL Query #1
+      </button>
+    </div>
     <span class="stat-value">₹{{ "%.2f"|format(student.unpaid_fine) }}</span>
     <span class="stat-desc">
       {% if student.unpaid_fine > 0 %}
@@ -26,7 +31,14 @@
 </div>
 
 <div class="card">
-  <div class="card-title">Itemized Fine Ledger</div>
+  <div class="card-title">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span>Itemized Fine Ledger ({{ fines|length }} Records)</span>
+      <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(2)" title="Inspect SQL Query #2 powering Personal Fine Ledger">
+        ⚡ SQL Query #2
+      </button>
+    </div>
+  </div>
   <div class="table-responsive">
     <table class="data-table">
       <thead>

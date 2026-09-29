@@ -8,7 +8,12 @@
     <h1 class="page-title">👤 {{ student.full_name }} ({{ student.roll_number }})</h1>
     <p class="page-subtitle">{{ student.department }} Department &bull; Email: {{ student.email }} &bull; Phone: {{ student.phone }}</p>
   </div>
-  <a href="{{ url_for('admin.students') }}" class="btn btn-outline">&larr; Back to Students</a>
+  <div style="display: flex; align-items: center; gap: 0.5rem;">
+    <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(1)" title="Inspect SQL Query #1 for Student Profile &amp; Metrics">
+      ⚡ SQL Query #1
+    </button>
+    <a href="{{ url_for('admin.students') }}" class="btn btn-outline">&larr; Back to Students</a>
+  </div>
 </div>
 
 <!-- Student Profile Overview Cards -->
@@ -40,7 +45,14 @@
 
 <!-- Loan History -->
 <div class="card">
-  <div class="card-title">📖 Complete Circulation Record</div>
+  <div class="card-title">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span>📖 Complete Circulation Record ({{ loans|length }})</span>
+      <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(2)" title="Inspect SQL Query #2 powering Circulation Record">
+        ⚡ SQL Query #2
+      </button>
+    </div>
+  </div>
   <div class="table-responsive">
     <table class="data-table">
       <thead>
@@ -85,7 +97,14 @@
 
 <!-- Fine Records -->
 <div class="card">
-  <div class="card-title">💰 Fine Audit Records</div>
+  <div class="card-title">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span>💰 Fine Audit Records ({{ fines|length }})</span>
+      <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(3)" title="Inspect SQL Query #3 powering Fine Audit Records">
+        ⚡ SQL Query #3
+      </button>
+    </div>
+  </div>
   <div class="table-responsive">
     <table class="data-table">
       <thead>

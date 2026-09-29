@@ -13,13 +13,23 @@
 <!-- Financial Summary KPI Cards -->
 <div class="stats-grid">
   <div class="stat-card alert-card">
-    <span class="stat-label">Total Outstanding Unpaid Fines</span>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
+      <span class="stat-label">Total Outstanding Unpaid Fines</span>
+      <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(2)" title="Inspect SQL Query #2 for Unpaid Fines Sum">
+        ⚡ SQL Query #2
+      </button>
+    </div>
     <span class="stat-value">₹{{ "%.2f"|format(total_unpaid) }}</span>
     <span class="stat-desc">Pending collection from students</span>
   </div>
 
   <div class="stat-card success-card">
-    <span class="stat-label">Total Collected Fines</span>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
+      <span class="stat-label">Total Collected Fines</span>
+      <button type="button" class="btn-block-sql" onclick="inspectQueryNumber(3)" title="Inspect SQL Query #3 for Collected Fines Sum">
+        ⚡ SQL Query #3
+      </button>
+    </div>
     <span class="stat-value">₹{{ "%.2f"|format(total_collected) }}</span>
     <span class="stat-desc">Successfully settled penalties</span>
   </div>
