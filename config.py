@@ -16,6 +16,7 @@ class Config:
     DB_NAME = os.getenv('DB_NAME', 'library_db')
     DB_USER = os.getenv('DB_USER', 'root')
     DB_PASSWORD = os.getenv('DB_PASSWORD', '')
+    SQLITE_DB_PATH = os.getenv('SQLITE_DB_PATH', str(Path(__file__).resolve().parent / 'database' / 'library.db'))
 
     # Business Rules
     MAX_ISSUED_BOOKS = 3

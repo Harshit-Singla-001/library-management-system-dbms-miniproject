@@ -6,58 +6,43 @@ Engineered specifically to demonstrate relational database design, 3NF normaliza
 
 ---
 
-## 📑 Project Documentation Index
-
-All core project specifications and architectural decisions are documented in dedicated references:
-
-- 🏗️ **[architecture.md](file:///d:/library-management-system/architecture.md)**: System architecture, ER diagram, normalization justification, and local MySQL server integration.
-- 🎨 **[design.md](file:///d:/library-management-system/design.md)**: Database table schemas, data types, state machine transitions, and UI layout wireframes.
-- 🧠 **[memory.md](file:///d:/library-management-system/memory.md)**: Decisions log, project memory, 14-phase roadmap, and viva checklist.
-- 📋 **[prd.md](file:///d:/library-management-system/prd.md)**: Product requirements document, user personas, functional specifications, and DBMS curriculum mapping.
-- ⚖️ **[rules.md](file:///d:/library-management-system/rules.md)**: The 7 core business rules, fine calculation formulas, DCL vs business permission distinction, and coding standards.
-
----
-
 ## 🛠️ Technology Stack
 
 - **Frontend**: HTML5, Vanilla CSS3 (Modern, responsive, accessible design), Vanilla JavaScript.
-- **Backend**: Python 3.14 + Flask 3.1 + `mysql-connector-python` / `PyMySQL`.
-- **Database**: Local MySQL 8.0 Server (InnoDB engine for foreign keys and ACID transactions).
-- **Environment**: Operates directly in the repository directory `d:\library-management-system` without needing XAMPP or htdocs.
+- **Backend**: Python 3.14 + Flask 3.1 + `mysql-connector-python` / `Werkzeug`.
+- **Database Architecture**: Intelligent Dual Engine (**MySQL 8.0** and **SQLite 3**):
+  - **Case 1 (Server Present & DB Present)**: Dual-Engine Synchronized Mode. Reads from MySQL with instant SQLite fallback; all writes (INSERT, UPDATE, DELETE, Transactions) are synchronized across both engines.
+  - **Case 2 (No Server Present)**: SQLite is automatically used as the **PRIMARY** database. The project runs out-of-the-box on any machine without requiring MySQL installation!
+  - **Case 3 (Server Present, DB Missing)**: Automatically creates `library_db` on MySQL and fetches/migrates all tables and records directly from SQLite!
+- **Environment**: Operates directly in the repository directory `d:\library-management-system`.
 
 ---
 
-## 🚀 Local Setup & Configuration Guide
+## 🚀 Quick Start Guide
 
-You do **NOT** need to move this Git repository. You can run the application directly from `d:\library-management-system`.
-
-### Step 1: Database Setup (Local MySQL 8.0 Server)
-
-1. Open your terminal or MySQL command line:
-   ```powershell
-   & "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p -e "CREATE DATABASE IF NOT EXISTS library_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-   ```
-2. Import the schema and seed scripts:
-   ```powershell
-   Get-Content "database/schema.sql" -Raw | & "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p library_db
-   Get-Content "database/sample_data.sql" -Raw | & "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p library_db
-   ```
-
-### Step 2: Database Connection Configuration
-
-Copy `.env.example` to `.env` and configure your local credentials:
-
-```ini
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_NAME=library_db
-DB_USER=root
-DB_PASSWORD=your_mysql_password
+### Step 1: Install Dependencies
+Install all required Python packages via the newly provided `requirements.txt`:
+```powershell
+pip install -r requirements.txt
 ```
 
-### Step 3: Running the Application
+### Step 2: Database Configuration (Flexible)
 
-Open PowerShell in `d:\library-management-system` and run:
+The system automatically detects your environment:
+- **Zero Configuration (Without MySQL Server)**: You do not need to install or configure MySQL. Simply run the app, and it will immediately use `database/library.db` as the primary database with all 50 students, books, categories, and authors pre-loaded!
+- **With MySQL Server**: Ensure your `.env` contains your MySQL credentials:
+  ```ini
+  DB_HOST=127.0.0.1
+  DB_PORT=3306
+  DB_NAME=library_db
+  DB_USER=root
+  DB_PASSWORD=your_mysql_password
+  ```
+  If `library_db` does not exist on your MySQL server, the application will automatically create it and fetch all tables and data from SQLite.
+
+### Step 3: Run the Application
+
+In your project directory, execute:
 ```powershell
 python app.py
 ```

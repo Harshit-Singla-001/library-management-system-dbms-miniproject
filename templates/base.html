@@ -84,11 +84,10 @@
     {% endif %}
   </main>
 
-  <!-- Collegiate Footer -->
+  <!-- Footer -->
   <footer class="footer">
     <p>
-      <span class="footer-highlight">Library Management System</span> | College DBMS Practical Demonstration
-      &bull; Powered by MySQL 8.0 &amp; Python Flask &bull; {{ current_year }}
+      &copy; {{ current_year }} <span class="footer-highlight">Library Management System</span>
     </p>
   </footer>
 
@@ -106,6 +105,7 @@
         <span class="drawer-icon">⚡</span>
         <span class="drawer-title">Live SQL Console</span>
         <span class="meta-tag meta-route">{{ request.path }}</span>
+        <span class="meta-tag" style="background: rgba(37,99,235,0.2); border: 1px solid rgba(59,130,246,0.4); color: #93c5fd;">{{ db_mode }}</span>
         <span class="meta-tag meta-count">{{ page_sql_queries|length }} {% if page_sql_queries|length == 1 %}Query{% else %}Queries{% endif %}</span>
         {% if user_roll %}
           <span class="meta-tag meta-roll">Student Roll: <strong>{{ user_roll }}</strong></span>

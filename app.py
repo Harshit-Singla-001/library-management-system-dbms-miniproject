@@ -4,6 +4,7 @@ from blueprints.auth import auth_bp
 from blueprints.admin import admin_bp
 from blueprints.student import student_bp
 from datetime import datetime
+from db import get_db_mode_display, get_db_mode
 
 def create_app():
     app = Flask(__name__)
@@ -46,7 +47,9 @@ def create_app():
             'user_name': session.get('full_name') or session.get('username'),
             'user_roll': session.get('roll_number'),
             'page_sql_queries': getattr(g, 'sql_queries', []),
-            'recent_action_queries': recent_action
+            'recent_action_queries': recent_action,
+            'db_mode': get_db_mode_display(),
+            'db_mode_code': get_db_mode()
         }
 
     @app.errorhandler(404)
@@ -65,6 +68,7 @@ if __name__ == '__main__':
     print("=" * 60)
     print("  LIBRARY MANAGEMENT SYSTEM - DBMS PROJECT RUNNING")
     print(f"  URL: http://127.0.0.1:5000")
+    print(f"  Database Engine: {get_db_mode_display()}")
     print("  Admin Credentials: admin / admin123")
     print("  Student Credentials Example: 2417119 / std119")
     print("=" * 60)
