@@ -59,7 +59,6 @@ Open your browser and navigate to: **`http://127.0.0.1:5000`**
 | **Student (1 Active Book)** | `2417105` | `std105` | `/student/dashboard` | 1 active book, ₹0 fine, GRANTED |
 | **Student (Max 3 Books)** | `2417112` | `std112` | `/student/dashboard` | 3 active books, reached limit |
 | **Student (Target Example)** | `2417119` | `std119` | `/student/dashboard` | Batch 2, 7-digit ID, custom password |
-| **Student (Revoked Status)**| `2417125` | `std125` | `/student/dashboard` | Permission REVOKED by admin |
 | **Student (Unpaid Fine)** | `2417130` | `std130` | `/student/dashboard` | Unpaid fine of ₹35.00 |
 
 *(The complete seeded dataset includes exactly 50 students from `2417101` to `2417150` with passwords `std101` to `std150` for realistic presentation.)*
